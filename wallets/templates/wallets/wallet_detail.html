@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallet</title>
+  </head>
+  <body>
+    <h4>Hey {{ owner.first_name }}, Here is your wallet details</h4>
+    Wallet - Total Value -> {{ wallet.total_value }} Coins Owned -
+    <ul>
+      {% for coin in wallet.coins.all %}
+      <li>
+        Name - {{ coin.cryptocurrency.name }} ({{ coin.cryptocurrency.symbol }})
+        Price = {{ coin.cryptocurrency.current_price }}
+        <a href="{% url 'wallets:remove-coin' coin_id=coin.id %}">Remove</a>
+      </li>
+      {% endfor %}
+    </ul>
+
+    Add coin to wallet
+    <ul>
+      {% for coin in coins %}
+      <li>
+        Name - {{ coin.name }} ({{ coin.symbol }}) Price = ${{ coin.price }}
+        <form
+          action="{% url 'wallets:add-coin' coin_id=coin.id %}"
+          method="post"
+        >
+          {% csrf_token %}
+          <input type="number" name="amount" id="amount" />
+          <input type="submit" value="Add" />
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

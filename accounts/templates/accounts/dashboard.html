@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <a href="{% url 'wallets:get-wallet' %}">Wallet</a>
+
+    <br />
+    <form
+      action="{% url 'accounts:search-coin' %}"
+      method="post"
+      id="search-form"
+    >
+      {% csrf_token %}
+      <input
+        type="search"
+        name="coin"
+        id="coin"
+        placeholder="Enter Name or Symbol"
+      />
+      <input type="submit" value="Search" />
+    </form>
+
+    <br />
+
+    <div id="results"></div>
+
+    TOP COINS:
+    <table border="1">
+      <tr>
+        <th>s/N</th>
+        <th>Name</th>
+        <th>Symbol</th>
+        <th>Price</th>
+        <th>24h (%)</th>
+      </tr>
+      {% for coin in coins %}
+      <tr>
+        <td>{{ loop.count }}</td>
+        <td>{{ coin.name }}</td>
+        <td>{{ coin.symbol }}</td>
+        <td>${{ coin.price }}</td>
+        <td>${{ coin.percent_change_24h }}</td>
+      </tr>
+      <br />
+      {% endfor %}
+    </table>
+
+    Wallet - Total Value -> {{ wallet.total_value }} Coins Owned -
+    <ul>
+      {% for coin in wallet.coins.all %}
+      <li>
+        Name - {{ coin.cryptocurrency.name }} ({{ coin.cryptocurrency.symbol }})
+        Price = {{ coin.cryptocurrency.current_price }}
+        <a href="{% url 'wallets:remove-coin' coin_id=coin.id %}">Remove</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+  <script>
+    $(document).ready(function () {
+      $("#search-form").submit(function (e) {
+        event.preventDefault();
+        var formData = $(this).serialize();
+        var form = event.target;
+
+        // AJAX request
+        $.ajax({
+          type: "POST",
+          url: form.action,
+          data: formData,
+          success: function (response) {
+            HTML = `<ul>`;
+            $.each(response, function (index, coin) {
+              console.log(coin);
+              HTML += `<li>
+                  ${coin.name} - ${coin.symbol} - ${coin.current_price}
+                  <form
+                    action="{% url 'wallets:add-coin' coin_id=2 %}"
+                    method="post"
+                  >
+                    {% csrf_token %}
+                    <input type="number" name="amount" id="amount" />
+                    <input type="submit" value="Add" />
+                  </form>
+                  </li>`;
+            });
+            HTML += "</ul>";
+            $("#results").html(HTML);
+          },
+        });
+      });
+    });
+  </script>
+</html>
